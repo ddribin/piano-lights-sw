@@ -1,9 +1,12 @@
 #include <Arduino.h>
 #include <SoftwareSerial.h>
 #include <FastLED.h>
+#include <MIDI.h>
 
 
-#define NUM_LEDS 30
+static const int NUM_LEDS = 44;
+static const int START_LED = 6;
+
 #define DATA_PIN 10
 
 #define USE_SERIAL 0
@@ -20,6 +23,32 @@ CRGB leds[NUM_LEDS];
 
 static const int NUM_KEYS = 88;
 bool keys[NUM_KEYS];
+static byte pedal = 0;
+
+struct MySettings : public midi::DefaultSettings
+{
+    static const bool Use1ByteParsing = false;
+};
+
+// MIDI_CREATE_CUSTOM_INSTANCE(HardwareSerial, Serial, MIDI, MySettings);
+MIDI_CREATE_DEFAULT_INSTANCE();
+
+static void handleNoteOn(byte channel, byte note, byte velocity);
+static void handleNoteOff(byte channel, byte note, byte velocity);
+static void handleControlChange(byte channel, byte number, byte value);
+
+long round_closest(long dividend, long divisor)
+{
+    return (dividend + (divisor / 2)) / divisor;
+}
+
+long my_map(long x, long in_min, long in_max, long out_min, long out_max)
+{
+    long numerator = (x - in_min) * (out_max - out_min);
+    long denominator = (in_max - in_min);
+    long result = round_closest(numerator, denominator) + out_min;
+    return result;
+}
 
 void setup()
 {
@@ -34,10 +63,22 @@ void setup()
 
     FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(84);
+
+    MIDI.begin(MIDI_CHANNEL_OMNI);
+    MIDI.setHandleNoteOn(handleNoteOn);
+    MIDI.setHandleNoteOff(handleNoteOff);
+    MIDI.setHandleControlChange(handleControlChange);
+
+    for (int i = 0; i < NUM_KEYS; i++) {
+        keys[i] = false;
+    }
 }
 
 void loop()
 {
+    MIDI.read();
+
+#if 0
     for (int i = 0; i < NUM_KEYS; i++) {
         keys[i] = false;
     }
@@ -57,17 +98,22 @@ void loop()
     Serial.print(key1);
     Serial.println();
 #endif
-
+#endif
+    int val1 = analogRead(PIN_POT0);
+    int saturation = my_map(val1, 0, 1023, 0, 255);
     int val2 = analogRead(PIN_POT1);
-    int brightness = map(val2, 0, 1024, 0, 255);
-    static int hue = 0;
+    int brightness = my_map(val2, 0, 1023, 0, 255);
+
+    MIDI.read();
 
     // First, clear the existing led values
     FastLED.clear();
+    MIDI.read();
     for (int i = 0; i < NUM_KEYS; i++) {
         if (keys[i]) {
-            int led = map(i, 0, NUM_KEYS-1, 0, NUM_LEDS-1);
-            leds[led] = CHSV(hue, 255, brightness);
+            int led = my_map(i, 0, NUM_KEYS-1, START_LED, NUM_LEDS-1);
+            int keyHue = my_map(i, 0, NUM_KEYS-1, 0, 255);
+            leds[led] = CHSV(keyHue, saturation, brightness);
 
 
 #if USE_SERIAL
@@ -79,7 +125,29 @@ void loop()
 #endif
         }
     }
+    MIDI.read();
 
-    hue++;
     FastLED.show();
+    MIDI.read();
+}
+
+static void handleNoteOn(byte channel, byte note, byte velocity)
+{
+    if ((note >= 21) && (note <= 108)) {
+        keys[note - 21] = true;
+    }
+}
+
+static void handleNoteOff(byte channel, byte note, byte velocity)
+{
+    if ((note >= 21) && (note <= 108)) {
+        keys[note - 21] = false;
+    }
+}
+
+static void handleControlChange(byte channel, byte number, byte value)
+{
+    // if (channel == 64) {
+        pedal = number;
+    // }
 }
