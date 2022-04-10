@@ -67,7 +67,7 @@ void loop()
     for (int i = 0; i < NUM_KEYS; i++) {
         if (keys[i]) {
             int led = map(i, 0, NUM_KEYS-1, 0, NUM_LEDS-1);
-            leds[led] = CHSV(hue, 255, brightness);
+            leds[led] = CHSV(brightness, 255, 255);
 
 
 #if USE_SERIAL
