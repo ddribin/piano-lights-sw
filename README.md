@@ -27,4 +27,4 @@ All the heavy lifting is done by the two libraries. The code reads MIDI note on 
 
 ## Demo Video
 
-[![Demo Video](https://img.youtube.com/vi/J1lft44vSmk/0.jpg)](https://www.youtube.com/watch?v=J1lft44vSmk)
+[![Demo Video](https://img.youtube.com/vi/pe3vuLcroIA/0.jpg)](https://www.youtube.com/watch?v=pe3vuLcroIA)
