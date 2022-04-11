@@ -19,6 +19,7 @@ Here's the software used:
 
 - [Arduino MIDI Library](https://github.com/FortySevenEffects/arduino_midi_library)
 - [FastLED](https://fastled.io)
+- [PlatformIO](https://platformio.org)
 
 ## How It Works
 
