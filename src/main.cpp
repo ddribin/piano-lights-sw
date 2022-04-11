@@ -4,10 +4,11 @@
 #include <MIDI.h>
 
 
-static const int NUM_LEDS = 44;
-static const int START_LED = 6;
+static const int NUM_LEDS = 90;
+static const int START_LED = 16;
 
-#define DATA_PIN 10
+#define DATA_PIN 11
+#define CLOCK_PIN 13
 
 #define USE_SERIAL 0
 
@@ -61,7 +62,7 @@ void setup()
     pinMode(PIN_BTN1, INPUT_PULLUP);
     pinMode(PIN_BTN2, INPUT_PULLUP);
 
-    FastLED.addLeds<NEOPIXEL, DATA_PIN>(leds, NUM_LEDS);
+    FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(84);
 
     MIDI.begin(MIDI_CHANNEL_OMNI);
