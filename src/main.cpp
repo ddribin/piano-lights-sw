@@ -7,6 +7,7 @@
 static const int NUM_LEDS = 90;
 static const int START_LED = 16;
 
+// Hardware SPI of Arduino Uno
 #define DATA_PIN 11
 #define CLOCK_PIN 13
 
@@ -68,7 +69,7 @@ void loop()
 
     int pot0 = analogRead(PIN_POT0);
     int saturation = my_map(pot0, 0, 1023, 0, 255);
-    
+
     int pot1 = analogRead(PIN_POT1);
     int brightness = my_map(pot1, 0, 1023, 0, 255);
 
@@ -77,17 +78,17 @@ void loop()
     for (int i = 0; i < NUM_KEYS; i++) {
         if (keys[i]) {
             int led = my_map(i, 0, NUM_KEYS-1, START_LED, NUM_LEDS-1);
-            int keyHue = my_map(i, 0, NUM_KEYS-1, 0, 255);
-            leds[led] = CHSV(keyHue, saturation, brightness);
+            int hue = my_map(i, 0, NUM_KEYS-1, 0, 255);
+            leds[led] = CHSV(hue, saturation, brightness);
         }
     }
 
     FastLED.show();
 }
 
-/// A0 note
+/// Note A0 MIDI value
 static const byte MIN_PIANO_MIDI_NOTE = 21;
-/// C8 note
+/// Note C8 MIDI value
 static const byte MAX_PIANO_MIDI_NOTE = 108;
 
 static void handleNoteOn(byte channel, byte note, byte velocity)
@@ -106,7 +107,7 @@ static void handleNoteOff(byte channel, byte note, byte velocity)
 
 static void handleControlChange(byte channel, byte number, byte value)
 {
-    // if (channel == 64) {
+    if (channel == 64) {
         pedal = number;
-    // }
+    }
 }
