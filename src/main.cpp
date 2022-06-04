@@ -42,6 +42,12 @@ static const uint8_t PIN_BTN2 = 4;
 static const uint8_t PIN_POT0 = 0;
 static const uint8_t PIN_POT1 = 1;
 
+static const uint8_t PIN_LED_GRN = 6;
+static const uint8_t PIN_LED_RED = 7;
+// LEDs are active low
+static const uint8_t LED_ON = LOW;
+static const uint8_t LED_OFF = HIGH;
+
 CRGB leds[NUM_LEDS];
 
 static const int NUM_KEYS = 88;
@@ -74,6 +80,11 @@ void setup()
     pinMode(PIN_BTN1, INPUT_PULLUP);
     pinMode(PIN_BTN2, INPUT_PULLUP);
 
+    pinMode(PIN_LED_GRN, OUTPUT);
+    pinMode(PIN_LED_RED, OUTPUT);
+    digitalWrite(PIN_LED_GRN, LED_ON);
+    digitalWrite(PIN_LED_RED, LED_ON);
+
     FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(84);
 
@@ -91,22 +102,30 @@ void loop()
 {
     MIDI.read();
 
+#if 0
     int pot0 = analogRead(PIN_POT0);
     int saturation = my_map(pot0, 0, 1023, 0, 255);
 
     int pot1 = analogRead(PIN_POT1);
     int brightness = my_map(pot1, 0, 1023, 0, 255);
+#else
+    int saturation = 255;
+    int brightness = 255;
+#endif
 
     // First, clear the existing led values
     FastLED.clear();
+    bool anyKeyDown = false;
     for (int i = 0; i < NUM_KEYS; i++) {
         if (keys[i]) {
             int led = my_map(i, 0, NUM_KEYS-1, START_LED, NUM_LEDS-1);
             int hue = my_map(i, 0, NUM_KEYS-1, 0, 255);
             leds[led] = CHSV(hue, saturation, brightness);
+            anyKeyDown = true;
         }
     }
 
+    digitalWrite(PIN_LED_GRN, anyKeyDown? LED_OFF : LED_ON);
     FastLED.show();
 }
 
