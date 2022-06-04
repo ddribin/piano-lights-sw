@@ -35,6 +35,7 @@ static const int START_LED = 16;
 #define DATA_PIN 11
 #define CLOCK_PIN 13
 
+// MIDI Shield pins
 static const uint8_t PIN_BTN0 = 2;
 static const uint8_t PIN_BTN1 = 3;
 static const uint8_t PIN_BTN2 = 4;
@@ -47,6 +48,11 @@ static const uint8_t PIN_LED_RED = 7;
 // LEDs are active low
 static const uint8_t LED_ON = LOW;
 static const uint8_t LED_OFF = HIGH;
+
+static const uint8_t PIN_SOFT_RX = 8;
+static const uint8_t PIN_SOFT_TX = 9;
+
+SoftwareSerial debug(PIN_SOFT_RX, PIN_SOFT_TX);
 
 CRGB leds[NUM_LEDS];
 
@@ -76,6 +82,12 @@ long my_map(long x, long in_min, long in_max, long out_min, long out_max)
 
 void setup()
 {
+    pinMode(PIN_SOFT_RX, INPUT);
+    pinMode(PIN_SOFT_TX, OUTPUT);
+    debug.begin(9600);
+    delay(1000);
+    debug.println("Piano Lights Running");
+
     pinMode(PIN_BTN0, INPUT_PULLUP);
     pinMode(PIN_BTN1, INPUT_PULLUP);
     pinMode(PIN_BTN2, INPUT_PULLUP);
@@ -138,6 +150,9 @@ static void handleNoteOn(byte channel, byte note, byte velocity)
 {
     if ((note >= MIN_PIANO_MIDI_NOTE) && (note <= MAX_PIANO_MIDI_NOTE)) {
         keys[note - MIN_PIANO_MIDI_NOTE] = true;
+
+        debug.print("Note On:  ");
+        debug.println(note);
     }
 }
 
@@ -145,11 +160,20 @@ static void handleNoteOff(byte channel, byte note, byte velocity)
 {
     if ((note >= MIN_PIANO_MIDI_NOTE) && (note <= MAX_PIANO_MIDI_NOTE)) {
         keys[note - MIN_PIANO_MIDI_NOTE] = false;
+        debug.print("Note Off: ");
+        debug.println(note);
     }
 }
 
 static void handleControlChange(byte channel, byte number, byte value)
 {
+    debug.print("CC: ");
+    debug.print(channel);
+    debug.print(", ");
+    debug.print(number);
+    debug.print(", ");
+    debug.println(value);
+    
     if (channel == 64) {
         pedal = number;
     }
