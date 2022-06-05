@@ -23,10 +23,14 @@
  */
 
 #include <Arduino.h>
-#include <SoftwareSerial.h>
 #include <FastLED.h>
 #include <MIDI.h>
 
+#define DEBUG 0
+
+#if DEBUG
+#include <AltSoftSerial.h>
+#endif
 
 static const int NUM_LEDS = 90;
 static const int START_LED = 16;
@@ -52,7 +56,9 @@ static const uint8_t LED_OFF = HIGH;
 static const uint8_t PIN_SOFT_RX = 8;
 static const uint8_t PIN_SOFT_TX = 9;
 
-SoftwareSerial debug(PIN_SOFT_RX, PIN_SOFT_TX);
+#if DEBUG
+AltSoftSerial debug;
+#endif
 
 CRGB leds[NUM_LEDS];
 
@@ -82,11 +88,12 @@ long my_map(long x, long in_min, long in_max, long out_min, long out_max)
 
 void setup()
 {
+#if DEBUG
     pinMode(PIN_SOFT_RX, INPUT);
     pinMode(PIN_SOFT_TX, OUTPUT);
     debug.begin(9600);
-    delay(1000);
     debug.println("Piano Lights Running");
+#endif
 
     pinMode(PIN_BTN0, INPUT_PULLUP);
     pinMode(PIN_BTN1, INPUT_PULLUP);
@@ -151,8 +158,10 @@ static void handleNoteOn(byte channel, byte note, byte velocity)
     if ((note >= MIN_PIANO_MIDI_NOTE) && (note <= MAX_PIANO_MIDI_NOTE)) {
         keys[note - MIN_PIANO_MIDI_NOTE] = true;
 
+#if DEBUG
         debug.print("Note On:  ");
         debug.println(note);
+#endif
     }
 }
 
@@ -160,19 +169,24 @@ static void handleNoteOff(byte channel, byte note, byte velocity)
 {
     if ((note >= MIN_PIANO_MIDI_NOTE) && (note <= MAX_PIANO_MIDI_NOTE)) {
         keys[note - MIN_PIANO_MIDI_NOTE] = false;
+
+#if DEBUG
         debug.print("Note Off: ");
         debug.println(note);
+#endif
     }
 }
 
 static void handleControlChange(byte channel, byte number, byte value)
 {
+#if DEBUG
     debug.print("CC: ");
     debug.print(channel);
     debug.print(", ");
     debug.print(number);
     debug.print(", ");
     debug.println(value);
+#endif
     
     if (channel == 64) {
         pedal = number;
