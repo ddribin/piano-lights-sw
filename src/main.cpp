@@ -102,7 +102,7 @@ void setup()
     pinMode(PIN_LED_GRN, OUTPUT);
     pinMode(PIN_LED_RED, OUTPUT);
     digitalWrite(PIN_LED_GRN, LED_ON);
-    digitalWrite(PIN_LED_RED, LED_ON);
+    digitalWrite(PIN_LED_RED, LED_OFF);
 
     FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(84);
@@ -115,6 +115,21 @@ void setup()
     for (int i = 0; i < NUM_KEYS; i++) {
         keys[i] = false;
     }
+
+    for (int i = 0; i < 3; i++) {
+        digitalWrite(PIN_LED_RED, LED_ON);
+        delay(250);
+        digitalWrite(PIN_LED_RED, LED_OFF);
+        delay(250);
+    }                                                                                  
+}
+
+void loop1()
+{
+    digitalWrite(PIN_LED_RED, LED_ON);
+    delay(500);
+    digitalWrite(PIN_LED_RED, LED_OFF);
+    delay(500);
 }
 
 void loop()
@@ -144,7 +159,7 @@ void loop()
         }
     }
 
-    digitalWrite(PIN_LED_GRN, anyKeyDown? LED_OFF : LED_ON);
+    digitalWrite(PIN_LED_RED, anyKeyDown? LED_ON : LED_OFF);
     FastLED.show();
 }
 
