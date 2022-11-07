@@ -32,8 +32,8 @@
 #include <AltSoftSerial.h>
 #endif
 
-static const int NUM_LEDS = 90;
-static const int START_LED = 16;
+static const int NUM_LEDS = 75;
+static const int START_LED = 1;
 
 // Hardware SPI of Arduino Uno
 #define DATA_PIN 11
