@@ -25,12 +25,11 @@
 #include <Arduino.h>
 #include <FastLED.h>
 #include <MIDI.h>
-
-#define DEBUG 1
-
-#if DEBUG
 #include <AltSoftSerial.h>
-#endif
+
+#include <new>
+
+#define DEBUG 0
 
 static const int NUM_LEDS = 75;
 static const int START_LED = 1;
@@ -57,8 +56,11 @@ static const uint8_t PIN_SOFT_RX = 8;
 static const uint8_t PIN_SOFT_TX = 9;
 
 #if DEBUG
-AltSoftSerial debug;
+// AltSoftSerial debug;
 #endif
+alignas(AltSoftSerial) uint8_t debugStorage[sizeof(AltSoftSerial)];
+AltSoftSerial *debug = NULL;
+bool DebugMode = false;
 
 CRGB leds[NUM_LEDS];
 
@@ -86,9 +88,35 @@ long my_map(long x, long in_min, long in_max, long out_min, long out_max)
     return result;
 }
 
+bool checkForDebugMode(void)
+{
+    if (digitalRead(PIN_BTN0) == HIGH) {
+        return false;
+    }
+
+    delay(100);
+    if (digitalRead(PIN_BTN0) == HIGH) {
+        return false;
+    }
+
+    return true;
+}
+
+void setupDebugMode(void)
+{
+    DebugMode = true;
+    pinMode(PIN_SOFT_RX, INPUT);
+    pinMode(PIN_SOFT_TX, OUTPUT);
+    // Placement new to initialize AltSoftSerial at statically allocated storage
+    debug = new(debugStorage) AltSoftSerial();
+    debug->begin(9600);
+    debug->println("\nPiano Lights Running");
+    debug->println("DEBUG MODE");
+}
+
 void setup()
 {
-#if DEBUG
+#if 0
     pinMode(PIN_SOFT_RX, INPUT);
     pinMode(PIN_SOFT_TX, OUTPUT);
     debug.begin(9600);
@@ -104,6 +132,10 @@ void setup()
     digitalWrite(PIN_LED_GRN, LED_ON);
     digitalWrite(PIN_LED_RED, LED_OFF);
 
+    if (checkForDebugMode()) {
+        setupDebugMode();
+    }
+
     FastLED.addLeds<SK9822, DATA_PIN, CLOCK_PIN>(leds, NUM_LEDS);
     FastLED.setBrightness(84);
 
@@ -116,7 +148,11 @@ void setup()
         keys[i] = false;
     }
 
-    for (int i = 0; i < 3; i++) {
+    int blinks = 3;
+    if (DebugMode) {
+        blinks = 6;
+    }
+    for (int i = 0; i < blinks; i++) {
         digitalWrite(PIN_LED_RED, LED_ON);
         delay(250);
         digitalWrite(PIN_LED_RED, LED_OFF);
