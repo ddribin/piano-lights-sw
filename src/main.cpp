@@ -26,7 +26,7 @@
 #include <FastLED.h>
 #include <MIDI.h>
 
-#define DEBUG 0
+#define DEBUG 1
 
 #if DEBUG
 #include <AltSoftSerial.h>
@@ -40,7 +40,7 @@ static const int START_LED = 1;
 #define CLOCK_PIN 13
 
 // MIDI Shield pins
-static const uint8_t PIN_BTN0 = 2;
+static const uint8_t PIN_BTN0 = 15;
 static const uint8_t PIN_BTN1 = 3;
 static const uint8_t PIN_BTN2 = 4;
 
@@ -48,7 +48,7 @@ static const uint8_t PIN_POT0 = 0;
 static const uint8_t PIN_POT1 = 1;
 
 static const uint8_t PIN_LED_GRN = 6;
-static const uint8_t PIN_LED_RED = 7;
+static const uint8_t PIN_LED_RED = 3;
 // LEDs are active low
 static const uint8_t LED_ON = LOW;
 static const uint8_t LED_OFF = HIGH;
