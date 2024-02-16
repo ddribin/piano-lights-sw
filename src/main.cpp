@@ -72,7 +72,10 @@ static void handleNoteOn(byte channel, byte note, byte velocity);
 static void handleNoteOff(byte channel, byte note, byte velocity);
 static void handleControlChange(byte channel, byte number, byte value);
 
-long round_closest(long dividend, long divisor)
+// Integer division with rounding using only integer operations
+// https://stackoverflow.com/questions/2422712/rounding-integer-division-instead-of-truncating/2422723#2422723
+// https://blog.pkh.me/p/36-figuring-out-round%2C-floor-and-ceil-with-integer-division.html
+long div_round_closest(long dividend, long divisor)
 {
     return (dividend + (divisor / 2)) / divisor;
 }
@@ -82,7 +85,7 @@ long my_map(long x, long in_min, long in_max, long out_min, long out_max)
 {
     long numerator = (x - in_min) * (out_max - out_min);
     long denominator = (in_max - in_min);
-    long result = round_closest(numerator, denominator) + out_min;
+    long result = div_round_closest(numerator, denominator) + out_min;
     return result;
 }
 
